@@ -33,7 +33,21 @@ os.chdir(DIR)
 with open('metadata.json') as f:
     VERSION_INFO = json.load(f)
 
-DEFAULT_SEARCH_URL = VERSION_INFO['meta']['canonical-urls']['html']
+
+CANONICAL_URLS = VERSION_INFO.get('meta', {}).get('canonical-urls', {})
+
+DEFAULT_SEARCH_URL = CANONICAL_URLS.get('html')
+STATIC_ASSETS_REPO_URL = CANONICAL_URLS.get('static-assets')
+if DEFAULT_SEARCH_URL is None or STATIC_ASSETS_REPO_URL is None:
+    print("'<html>' and '<static-assets>' tags are required in law-xml/index.xml under '<canonical-urls>'.")
+    print("Try pulling the latest law-xml changes and building repositories again.")
+    sys.exit(1)
+
+STATIC_ASSETS_DIR = os.path.join(DIR, 'static-assets')
+if not os.path.exists(STATIC_ASSETS_DIR):
+    os.mkdir(STATIC_ASSETS_DIR)
+
+
 PORTAL_CLIENT_CLASS = None
 PORTAL_HOST = None
 SEARCH_CLIENT_CLASS = None
@@ -58,12 +72,72 @@ filetypes = {
     'woff2',
 }
 
+AUTH_PATH_PREFIX = '/_api/authenticate'
 HISTORICAL_VERSIONS_PATH_PREFIXES = ('/_publication', '/_date', '/_compare')
 PORTAL_PATH_PREFIXES = ('/_portal', '/_api') + HISTORICAL_VERSIONS_PATH_PREFIXES
 
 
+# custom 404 error template
+try:
+    with open("404.html", "r") as f:
+        ERROR_404_TEMPLATE = f.read()
+except FileNotFoundError:
+    ERROR_404_TEMPLATE = None
+
+
+def download_static_assets(static_assets_repo_url=STATIC_ASSETS_REPO_URL, force=False):
+    from io import BytesIO
+    from zipfile import ZipFile
+    import urllib.request
+    import shutil
+
+    # skip download if already exists
+    if not (len(os.listdir(STATIC_ASSETS_DIR)) == 0 or force):
+        return
+
+    print("\nDownloading static assets...\n")
+
+    try:
+        # fix for CERTIFICATE_VERIFY_FAILED
+        def _fix_cert():
+            import ssl
+            if not os.environ.get('PYTHONHTTPSVERIFY', '') and getattr(ssl, '_create_unverified_context', None):
+                ssl._create_default_https_context = ssl._create_unverified_context
+
+        ZIP_URL = "{}/archive/master.zip".format(static_assets_repo_url)
+
+        _fix_cert()
+        data = urllib.request.urlopen(ZIP_URL)
+
+        with ZipFile(BytesIO(data.read())) as zip_file:
+            files = zip_file.namelist()
+            root_dir = files.pop(0)
+
+            for member in files:
+                member_path = os.path.join(
+                    STATIC_ASSETS_DIR, os.path.relpath(member, root_dir))
+                # skip empty directories
+                if not os.path.basename(member):
+                    if not os.path.exists(member_path):
+                        os.mkdir(member_path)
+                    continue
+
+                # copy file (taken from zipfile's extract)
+                source = zip_file.open(member)
+                target = open(member_path, "wb")
+                with source, target:
+                    shutil.copyfileobj(source, target)
+
+    except Exception as e:
+        print("ERROR: {}".format(str(e)))
+        sys.exit(1)
+
+
 class RequestHandler(SimpleHTTPRequestHandler):
-    def _proxy(self, Client, host, upstream_name):
+    if ERROR_404_TEMPLATE:
+        error_message_format = ERROR_404_TEMPLATE
+
+    def _proxy(self, Client, host, upstream_name, method='GET', body=None):
         """
         proxy the current request to the given host using the given
         http.client Client class. 404 if not configured to proxy
@@ -85,7 +159,10 @@ class RequestHandler(SimpleHTTPRequestHandler):
             'X-Forwarded-Host': self.headers['Host'],
             'X-Forwarded-Proto': 'http',
         })
-        client.request('GET', self.path, headers=req_headers)
+        if method in http.client._METHODS_EXPECTING_BODY:
+            client.request(method, self.path, headers=req_headers, body=body)
+        else:
+            client.request(method, self.path, headers=req_headers)
         try:
             resp = client.getresponse()
         except:
@@ -124,6 +201,12 @@ class RequestHandler(SimpleHTTPRequestHandler):
                 self.path = self.path + '.html'
             super().do_GET()
 
+    def do_POST(self):
+        if self.path == AUTH_PATH_PREFIX:
+            content_len = int(self.headers.get('Content-Length'))
+            body = self.rfile.read(content_len)
+            return self._proxy(PORTAL_CLIENT_CLASS, PORTAL_HOST, 'portal', method='POST', body=body)
+
     def translate_path(self, path):
         """Translate a /-separated PATH to the local filename syntax.
 
@@ -154,7 +237,11 @@ class RequestHandler(SimpleHTTPRequestHandler):
             path = os.path.join(path, word)
         if trailing_slash:
             path += '/'
-        return path
+
+        if os.path.isdir(path) or path.endswith(".html") or os.path.exists(path):  # html or files in root dir
+            return path
+        else:  # static assets
+            return os.path.join(STATIC_ASSETS_DIR, os.path.relpath(path, DIR))
 
 
 def get_http_client_info(upstream_name, url):
@@ -186,6 +273,10 @@ if __name__ == '__main__':
                         help='url to proxy portal requests to. [default: None]')
     parser.add_argument('--no-open-browser', default=False, action="store_true",
                         help='do not open the library in default browser after starting server.')
+    parser.add_argument('--static-assets-repo-url', default=STATIC_ASSETS_REPO_URL,
+                        help='a git repository url from which to download static assets.')
+    parser.add_argument('--force-update-static-assets', default=False, action="store_true",
+                        help='download static assets if already exists on a disk.')
     args = parser.parse_args()
     server_address = (args.bind, args.port)
 
@@ -206,8 +297,13 @@ if __name__ == '__main__':
     print("Visit {} in your webbrowser to view library...".format(url))
     print("\n\n*** This server is designed for local use. Do not use in production. ***\n\n")
 
-    PORTAL_CLIENT_CLASS, PORTAL_HOST = get_http_client_info('portal', args.portal_proxy_url)
-    SEARCH_CLIENT_CLASS, SEARCH_HOST = get_http_client_info('search', args.search_proxy_url)
+    PORTAL_CLIENT_CLASS, PORTAL_HOST = get_http_client_info(
+        'portal', args.portal_proxy_url)
+    SEARCH_CLIENT_CLASS, SEARCH_HOST = get_http_client_info(
+        'search', args.search_proxy_url)
+
+    download_static_assets(args.static_assets_repo_url,
+                           force=args.force_update_static_assets)
 
     def visit_library():
         time.sleep(2)

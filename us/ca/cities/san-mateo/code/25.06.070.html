@@ -53,15 +53,17 @@
     <script src="/_reader/js/main.js"> </script>
   </head>
   <body>
-    <div role="region" id="announcer" aria-live="polite" class="sr-only" aria-atomic="true">
+    <div role="region" id="announcer" aria-live="polite" class="sr-only" aria-atomic="true" aria-label="Live messages">
       <p id="message"> </p>
     </div>
-    <a href="#area__content" class="skip-link">Skip to main content</a>
+    <nav class="visually-hidden">
+      <a href="#area__content" class="skip-link">Skip to main content</a>
+    </nav>
     <div id="grid" class="ns__document__oll-core">
       <header id="section__header" class="ns__document__oll-core">
         <div id="section__header__inner" class="ns__document__oll-core">
           <div id="area__logo" class="ns__document__oll-core">
-            <a href="/" class="logo" alt="San Mateo Law Library">
+            <a href="/" class="logo" aria-label="Logo - Return to home page">
               <img src="/us/ngo/oll/_document/v2/images/logo/logo.png" srcset="/us/ngo/oll/_document/v2/images/logo/logo.png 1x, /us/ngo/oll/_document/v2/images/logo/logo@2x.png 2x" alt="San Mateo Law Library logo"/>
             </a>
           </div>
@@ -70,11 +72,13 @@
           </div>
         </div>
       </header>
-      <section id="section__content" class="ns__document__oll-core">
+      <div id="section__content" class="ns__document__oll-core">
         <div id="section__content__inner" class="ns__document__oll-core">
-          <section id="area__breadcrumbs" class="ns__document__oll-core" role="region">
-            <input type="checkbox" id="menu-trigger" class="menu-trigger" aria-hidden="true" aria-label="Mobile menu toggler"/>
-            <label for="menu-trigger" aria-label="Toggle mobile menu"> </label>
+          <section id="area__breadcrumbs" class="ns__document__oll-core" role="region" aria-label="Breadcrumbs">
+            <input type="checkbox" id="menu-trigger" class="menu-trigger" aria-label="Mobile menu toggler"/>
+            <label for="menu-trigger">
+              <span class="visually-hidden">Toggle mobile menu</span>
+            </label>
             <nav role="navigation" aria-label="Breadcrumb navigation">
               <div class="h__ui">Navigation</div>
               <ul class="ancestors">
@@ -98,7 +102,7 @@
           </section>
           <main id="area__content" class="ns__document__oll-core">
             <div class="h__document-title">City of San Mateo Municipal Code.</div>
-            <article class="content" role="document" ref-path="25.06.070">
+            <article class="content" role="document" data-ref-path="25.06.070">
               <div class="tuf-authenticate">
                 <h1 class="h__toc" id="/us/ca/cities/san-mateo/code/25.06.070">25.06.070 ZONING REGULATIONS APPLICABLE TO SIGNS ON PRIVATE PROPERTY.</h1>
                 <p class="text-indent-1"><span class="level-num" id="(a)">(a)</span> <span class="level-heading">Residential Districts (R1-A, R1-B, R1-C, R2, R3, R4, R5, R4-D, R5-D and R6-D).</span></p>
@@ -288,19 +292,16 @@
                 <p class="text-indent-2"><span class="level-num" id="(c)(4)">(4)</span> <span class="level-heading">Multiple Tenants.</span> Where a building contains more than one tenant and individual signs are desired, the provisions of <a class="internal-link no-wrap" href="/us/ca/cities/san-mateo/code/25.06.050#(b)(6)" title="">Section 25.06.050(b)(6)</a> shall apply.</p>
                 <div class="table_wrap">
                   <table>
-                    <caption>Table 25.06-4: Sign Restrictions in the Central Business District (CBD)-Required Retail 
-Frontage Area</caption>
-                    <thead>
-                      <tr>
-                        <th>Total Sign Area Permitted</th>
-                        <th colspan="2">Primary Street Frontage: 1 sq. ft./1 lineal foot of street frontage; maximum 100 sq. ft., minimum 35 sq. ft.</th>
-                        <th>Secondary Street Frontage: 0.5 sq. ft./1 lineal foot of street frontage; maximum 50 sq. ft., minimum 25 sq. ft.</th>
-                      </tr>
-                    </thead>
+                    <caption>Table 25.06-4: Sign Restrictions in the Central Business District (CBD)-Required Retail Frontage Area</caption>
                     <tbody>
                       <tr>
+                        <th>Total Sign Area Permitted</th>
+                        <td colspan="2"><strong>Primary Street Frontage:</strong> 1 sq. ft./1 lineal foot of street frontage; maximum 100 sq. ft., minimum 35 sq. ft.</td>
+                        <td><strong>Secondary Street Frontage:</strong> 0.5 sq. ft./1 lineal foot of street frontage; maximum 50 sq. ft., minimum 25 sq. ft.</td>
+                      </tr>
+                      <tr>
                         <th>Number of Signs Permitted</th>
-                        <td>2 signs per street frontage per business. Only 1 sign per street frontage may be a projecting sign. For multi-tenant buildings see <a class="internal-link no-wrap" href="/us/ca/cities/san-mateo/code/25.06.050#(b)(6)" title="">Section 25.06.050(b)(6)</a>.</td>
+                        <td colspan="3">2 signs per street frontage per business. Only 1 sign per street frontage may be a projecting sign. For multi-tenant buildings see <a class="internal-link no-wrap" href="/us/ca/cities/san-mateo/code/25.06.050#(b)(6)" title="">Section 25.06.050(b)(6)</a>.</td>
                       </tr>
                       <tr>
                         <th>Types of Permitted Signs</th>
@@ -353,7 +354,7 @@ Frontage Area</caption>
                         </td>
                       </tr>
                       <tr>
-                        <td>No sign, regardless of type, shall be located above 40 ft. above grade, except as provided for high-rise buildings in <a class="internal-link no-wrap" href="/us/ca/cities/san-mateo/code/25.06.050" title="25.06.050 SIGNS ALLOWED.">Section 25.06.050</a>.</td>
+                        <td colspan="4">No sign, regardless of type, shall be located above 40 ft. above grade, except as provided for high-rise buildings in <a class="internal-link no-wrap" href="/us/ca/cities/san-mateo/code/25.06.050" title="25.06.050 SIGNS ALLOWED.">Section 25.06.050</a>.</td>
                       </tr>
                     </tbody>
                   </table>
@@ -369,7 +370,7 @@ Frontage Area</caption>
                     <thead>
                       <tr>
                         <th/>
-                        <th>All E Districts, except San Mateo Drive Between Baldwin &amp; Villa Terrace</th>
+                        <th colspan="2">All E Districts, except San Mateo Drive Between Baldwin &amp; Villa Terrace</th>
                         <th>E Districts on San Mateo Drive Between Baldwin &amp; Villa Terrace</th>
                       </tr>
                     </thead>
@@ -428,7 +429,7 @@ Frontage Area</caption>
                         </td>
                       </tr>
                       <tr>
-                        <td>No sign, regardless of type, shall be located above 40 ft. above grade, except as provided for high-rise buildings in <a class="internal-link no-wrap" href="/us/ca/cities/san-mateo/code/25.06.050" title="25.06.050 SIGNS ALLOWED.">Section 25.06.050</a>.</td>
+                        <td colspan="4">No sign, regardless of type, shall be located above 40 ft. above grade, except as provided for high-rise buildings in <a class="internal-link no-wrap" href="/us/ca/cities/san-mateo/code/25.06.050" title="25.06.050 SIGNS ALLOWED.">Section 25.06.050</a>.</td>
                       </tr>
                     </tbody>
                   </table>
@@ -469,7 +470,7 @@ Frontage Area</caption>
               </div>
             </article>
           </main>
-          <nav id="area__navigation_mini" class="ui ns__document__oll-core" role="region" aria-label="Previous and next article links">
+          <nav id="area__navigation_mini" class="ns__document__oll-core" aria-label="Previous and next article links">
             <section>
               <a href="/us/ca/cities/san-mateo/code/25.06.060" aria-label="25.06.060 SIGNS ALLOWED WITHOUT PERMIT (EXEMPT SIGNS).">
                 <div class="h__ui">Previous</div>
@@ -484,13 +485,13 @@ Frontage Area</caption>
             </section>
           </nav>
         </div>
-      </section>
+      </div>
       <footer id="section__footer" class="ns__document__oll-core">
         <div id="section__footer__inner" class="ns__document__oll-core">
           <div id="area__footer__content" class="ns__document__oll-core">
             <p>The codes and laws on this website are in the public domain.</p>
             <p>
-      Please do not scrape. Instead, bulk download the <a href="https://github.com/cityofsanmateo/law-html">HTML</a> or <a href="https://github.com/cityofsanmateo/law-xml">XML</a>.
+      Please do not scrape. Instead, bulk download the <a href="https://github.com/oll-test-repos/cityofsanmateo-law-html">HTML</a> or <a href="https://github.com/oll-test-repos/cityofsanmateo-law-xml">XML</a>.
     </p>
             <p>Powered by the non-profit <a href="http://www.openlawlib.org/">Open Law Library</a>.</p>
           </div>
@@ -499,7 +500,7 @@ Frontage Area</caption>
     </div>
     <!--Piwik analytics-->
     <noscript>
-      <img src="/_analytics/pixel.png?idsite=2" style="border:0;" alt=""/>
+      <img src="/_analytics/pixel.png" style="border:0;" alt=""/>
     </noscript>
   </body>
 </html>
