@@ -27,6 +27,12 @@ from http.server import HTTPServer, SimpleHTTPRequestHandler
 
 DIR = os.path.abspath(os.path.dirname(__file__))
 
+if getattr(sys, 'frozen', False):
+    DIR = os.path.dirname(sys.executable)
+elif __file__:
+    DIR = os.path.dirname(__file__)
+DIR = os.path.abspath(DIR)
+
 # make sure our working directory for this server is the same as this file is in
 os.chdir(DIR)
 
@@ -74,12 +80,7 @@ filetypes = {
     'woff2',
 }
 
-AUTH_PATH_PREFIXES = (
-    '/_api/authenticate', 
-    '/_api/check-hashes', 
-    '/_portal/api/annotations', 
-    '/_portal/api/share'
-)
+AUTH_PATH_PREFIXES = ('/_api/authenticate', '/_api/check-hashes', '/_portal/api/annotations', )
 HISTORICAL_VERSIONS_PATH_PREFIXES = ('/_publication', '/_date', '/_compare', )
 PORTAL_PATH_PREFIXES = ('/_portal', '/_api') + HISTORICAL_VERSIONS_PATH_PREFIXES
 
@@ -97,7 +98,6 @@ def download_static_assets(static_assets_repo_url=STATIC_ASSETS_REPO_URL, force=
     from zipfile import ZipFile
     import urllib.request
     import shutil
-
     # skip download if already exists
     if not (len(os.listdir(STATIC_ASSETS_DIR)) == 0 or force):
         return
@@ -111,10 +111,17 @@ def download_static_assets(static_assets_repo_url=STATIC_ASSETS_REPO_URL, force=
             if not os.environ.get('PYTHONHTTPSVERIFY', '') and getattr(ssl, '_create_unverified_context', None):
                 ssl._create_default_https_context = ssl._create_unverified_context
 
-        ZIP_URL = "{}/archive/master.zip".format(static_assets_repo_url)
-
+        ZIP_URL = "{}/archive/main.zip".format(static_assets_repo_url)
+        BACKUP_ZIP_URL = "{}/archive/master.zip".format(static_assets_repo_url)
         _fix_cert()
-        data = urllib.request.urlopen(ZIP_URL)
+        try:
+            data = urllib.request.urlopen(ZIP_URL)
+        except urllib.error.HTTPError as e:
+            if e.code == 404:
+                data = urllib.request.urlopen(BACKUP_ZIP_URL)
+            else:
+                raise e
+        
 
         with ZipFile(BytesIO(data.read())) as zip_file:
             files = zip_file.namelist()
@@ -211,19 +218,6 @@ class RequestHandler(SimpleHTTPRequestHandler):
             body = self.rfile.read(content_len)
             return self._proxy(PORTAL_CLIENT_CLASS, PORTAL_HOST, 'portal', method='POST', body=body)
 
-    # Need to handle OPTIONS since they are sent before POST
-    def do_OPTIONS(self):
-        # Just proxy it to portal
-        return self._proxy(PORTAL_CLIENT_CLASS, PORTAL_HOST, 'portal', method='OPTIONS')
-
-    def do_DELETE(self):
-        return self._proxy(PORTAL_CLIENT_CLASS, PORTAL_HOST, 'portal', method='DELETE')
-
-    def do_PUT(self):
-        content_len = int(self.headers.get('Content-Length'))
-        body = self.rfile.read(content_len)
-        return self._proxy(PORTAL_CLIENT_CLASS, PORTAL_HOST, 'portal', method='PUT', body=body)
-
     def translate_path(self, path):
         """Translate a /-separated PATH to the local filename syntax.
 
@@ -270,10 +264,7 @@ class RequestHandler(SimpleHTTPRequestHandler):
             return index_page
 
     def end_headers(self):
-        # Commenting this since proxied response from the portal already contains
-        # this header. Having two `Allow-Origin` headers makes browser drop
-        # requests automatically.
-        # self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Origin', '*')
         SimpleHTTPRequestHandler.end_headers(self)
 
 
