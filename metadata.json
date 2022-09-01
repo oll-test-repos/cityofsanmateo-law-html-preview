@@ -1,21 +1,21 @@
 {
   "meta": {
     "build": {
-      "build-date": "2022-08-24",
-      "ci-build-number": "1.0.1641",
+      "build-date": "2022-09-01",
+      "ci-build-number": "1.0.1661",
       "ci-project": "test/cityofsanmateo/law-xml",
       "codified-date": "2022-09-14",
       "platform": {
         "reproducible": "false",
-        "version": "2.6.0"
+        "version": "2.5.12"
       },
       "repositories": [
         {
-          "commit": "144850fa6f2b6058bf27c777317158acf3c815a8",
+          "commit": "a8c792411ddf439bb5a8aa8febb3557f1b584051",
           "name": "cityofsanmateo/law-xml"
         },
         {
-          "commit": "b5037b50afcc2fe6ed5b8b2c604fbc7a963aaf07",
+          "commit": "8b1671bd56d28722d50f3c578f25ab96b21b27c7",
           "name": "cityofsanmateo/law-xml-codified-preview"
         }
       ]
