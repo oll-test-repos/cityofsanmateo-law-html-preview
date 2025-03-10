@@ -1,13 +1,13 @@
 {
   "meta": {
     "build": {
-      "build-date": "2024-11-14",
-      "ci-build-number": "1.0.1417",
+      "build-date": "2024-11-21",
+      "ci-build-number": "1.0.1431",
       "ci-project": "test/ngo-law-xml",
       "codified-date": "2024-06-19",
       "platform": {
         "reproducible": "false",
-        "version": "2.14.5.dev2818"
+        "version": "2.14.5.dev2837"
       },
       "repositories": [
         {
@@ -15,7 +15,7 @@
           "name": "cityofsanmateo/law-xml"
         },
         {
-          "commit": "ee8f89d6d4bab1dce89b9784135f6c50cc60c1a2",
+          "commit": "adb550064f13acc75842a076f3420d2955f734ac",
           "name": "cityofsanmateo/law-xml-codified-preview"
         }
       ]
